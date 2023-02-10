@@ -10,11 +10,11 @@ CMD_SETUP_WEB_PASSWORD = ". bash_functions.sh ; setup_web_password"
 
 
 def _cat(file):
-    return "cat {}".format(file)
+    return f"cat {file}"
 
 
 def _grep(string, file):
-    return "grep -q '{}' {}".format(string, file)
+    return f"grep -q '{string}' {file}"
 
 
 @pytest.mark.parametrize(
@@ -34,13 +34,13 @@ def test_ipv6_not_true_removes_ipv6(
     WEB_CONFIG = "/etc/lighttpd/lighttpd.conf"
 
     function = docker.run(". /usr/local/bin/bash_functions.sh ; setup_ipv4_ipv6")
-    assert "Using {}".format(expected_stdout) in function.stdout
+    assert f"Using {expected_stdout}" in function.stdout
     if expected_stdout == "IPv4":
         assert "IPv6" not in function.stdout
     # On overlay2(?) docker sometimes writes to disk are slow enough to break some tests...
     expected_ipv6_check = (
         lambda: (
-            IPV6_LINE in docker.run("grep 'use-ipv6.pl' {}".format(WEB_CONFIG)).stdout
+            IPV6_LINE in docker.run(f"grep 'use-ipv6.pl' {WEB_CONFIG}").stdout
         )
         == expected_ipv6
     )
@@ -96,12 +96,12 @@ def test_bad_input_to_web_port(docker, test_args, expected_error):
 )
 def test_overrides_default_custom_cache_size(docker, slow, test_args, cache_size):
     """Changes the cache_size setting to increase or decrease the cache size for dnsmasq"""
-    CONFIG_LINE = r"cache-size\s*=\s*{}".format(cache_size)
+    CONFIG_LINE = f"cache-size\s*=\s*{cache_size}"
 
     function = docker.run(
         "echo ${CUSTOM_CACHE_SIZE};. ./usr/local/bin/bash_functions.sh; echo ${CUSTOM_CACHE_SIZE}; eval `grep setup_FTL_CacheSize /usr/local/bin/_startup.sh`"
     )
-    assert "Custom CUSTOM_CACHE_SIZE set to {}".format(cache_size) in function.stdout
+    assert f"Custom CUSTOM_CACHE_SIZE set to {cache_size}" in function.stdout
     slow(
         lambda: re.search(CONFIG_LINE, docker.run(_cat(DNSMASQ_CONFIG_LOC)).stdout)
         is not None
@@ -160,7 +160,7 @@ def test_dns_interface_override_defaults(
     assert expected_stdout in function.stdout
     slow(
         lambda: expected_config_line + "\n"
-        == docker.run('grep "^PIHOLE_INTERFACE" {}'.format(SETUPVARS_LOC)).stdout
+        == docker.run(f'grep "^PIHOLE_INTERFACE" {SETUPVARS_LOC}').stdout
     )
 
 
@@ -181,11 +181,7 @@ def test_debian_setup_php_env(docker, expected_lines, repeat_function):
             ". /usr/local/bin/bash_functions.sh ; eval `grep setup_php_env /usr/local/bin/_startup.sh`"
         )
     for expected_line in expected_lines:
-        search_config_cmd = (
-            "grep -c '{}' /etc/lighttpd/conf-enabled/15-fastcgi-php.conf".format(
-                expected_line
-            )
-        )
+        search_config_cmd = f"grep -c '{expected_line}' /etc/lighttpd/conf-enabled/15-fastcgi-php.conf"
         search_config_count = docker.run(search_config_cmd)
         found_lines = int(search_config_count.stdout.rstrip("\n"))
         if found_lines > 1:
@@ -239,9 +235,7 @@ def test_env_always_updates_password(docker, args_env, test_args):
 def test_setupvars_trumps_random_password_if_set(docker, args_env, test_args):
     """If a password is already set in setupvars, and no password is set in the environment variable, do not generate a random password"""
     docker.run(
-        ". /opt/pihole/utils.sh ; addOrEditKeyValPair {} WEBPASSWORD volumepass".format(
-            SETUPVARS_LOC
-        )
+        f". /opt/pihole/utils.sh ; addOrEditKeyValPair {SETUPVARS_LOC} WEBPASSWORD volumepass"
     )
     function = docker.run(CMD_SETUP_WEB_PASSWORD)
 

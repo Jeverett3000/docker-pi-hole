@@ -47,7 +47,7 @@ def args_env():
 
 @pytest.fixture()
 def args(args_volumes, args_env):
-    return "{} {}".format(args_volumes, args_env)
+    return f"{args_volumes} {args_env}"
 
 
 @pytest.fixture()
@@ -74,7 +74,7 @@ def docker_generic(request, _test_args, _args, _image, _cmd, _entrypoint):
 
     request.addfinalizer(teardown)
     docker_container = testinfra.backend.get_backend(
-        "docker://" + docker_id, sudo=False
+        f"docker://{docker_id}", sudo=False
     )
     docker_container.id = docker_id
 
@@ -126,7 +126,7 @@ def version():
 
 @pytest.fixture()
 def tag(version):
-    return "{}".format(version)
+    return f"{version}"
 
 
 @pytest.fixture
@@ -138,7 +138,7 @@ def webserver(tag):
 @pytest.fixture()
 def image(tag):
     image = "pihole"
-    return "{}:{}".format(image, tag)
+    return f"{image}:{tag}"
 
 
 @pytest.fixture()
@@ -168,7 +168,7 @@ def persist_args_env():
 
 @pytest.fixture(scope="module")
 def persist_args(persist_args_volumes, persist_args_env):
-    return "{} {}".format(persist_args_volumes, persist_args_env)
+    return f"{persist_args_volumes} {persist_args_env}"
 
 
 @pytest.fixture(scope="module")
@@ -179,7 +179,7 @@ def persist_test_args():
 
 @pytest.fixture(scope="module")
 def persist_tag(persist_version):
-    return "{}".format(persist_version)
+    return f"{persist_version}"
 
 
 @pytest.fixture(scope="module")
@@ -191,7 +191,7 @@ def persist_webserver(persist_tag):
 @pytest.fixture(scope="module")
 def persist_image(persist_tag):
     image = "pihole"
-    return "{}:{}".format(image, persist_tag)
+    return f"{image}:{persist_tag}"
 
 
 @pytest.fixture(scope="module")
